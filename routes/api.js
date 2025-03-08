@@ -21,6 +21,10 @@ module.exports = function (app) {
       let project = req.params.project;
       const b = req.body;
 
+      requiredFieldsForProjectIssue.map((field) => {
+        if(!b[field]) res.json({ error: 'required field(s) missing' })
+      })
+
       if (!projects[project]) {
         projects[project] = {issues: []}
       }
