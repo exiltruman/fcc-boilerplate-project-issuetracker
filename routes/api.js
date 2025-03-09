@@ -4,8 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 
 module.exports = function (app) {
 
-  //https://3000-exiltruman-fccboilerpla-53zzed2xfkn.ws-eu118.gitpod.io/api/issues/apitest?open=false
-
   const projects = [];
 
   const requiredFieldsForProjectIssue = ['issue_title', 'issue_text', 'created_by'];
@@ -63,12 +61,33 @@ module.exports = function (app) {
     
     .put(function (req, res){
       let project = req.params.project;
-      
+
+      if(!req.body._id) res.json({ error: 'missing _id' })
+
+      const reqId = req.body._id;
+      let issue = projects[project].issues.find((issue) => issue._id === reqId);
+      if(issue) {
+        Object.keys(req.body).map((key) => {
+          issue[key] = req.body[key];
+        })
+        issue.updated_on = new Date();
+      }
+
+      res.json({  result: 'successfully updated', '_id': req.body._id })
     })
     
     .delete(function (req, res){
       let project = req.params.project;
       
+      const reqId = req.body._id;
+      if(!reqId) res.json({ error: 'missing _id' })
+
+      if(projects[project].issues.find(({_id}) => _id === reqId)) {
+        projects[project].issues = projects[project].issues.filter(({_id}) => _id !== reqId)
+        res.json({ result: 'successfully deleted', '_id': reqId })
+      } else {
+        res.json({ error: 'could not delete', '_id': reqId })
+      }
     });
     
 };
