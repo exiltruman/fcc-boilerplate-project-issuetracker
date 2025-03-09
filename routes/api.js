@@ -65,15 +65,23 @@ module.exports = function (app) {
       if(!req.body._id) res.json({ error: 'missing _id' })
 
       const reqId = req.body._id;
+
+      if(!Object.keys(req.body).filter((bodyKey) => {
+        return [...requiredFieldsForProjectIssue, ...optionalFieldsFroProjectIssue].includes(bodyKey);
+      }).length) {
+        res.json({ error: 'no update field(s) sent', '_id': reqId })
+      }
+
       let issue = projects[project].issues.find((issue) => issue._id === reqId);
       if(issue) {
         Object.keys(req.body).map((key) => {
           issue[key] = req.body[key];
         })
         issue.updated_on = new Date();
+        res.json({  result: 'successfully updated', '_id': reqId })
       }
 
-      res.json({  result: 'successfully updated', '_id': req.body._id })
+      res.json({ error: 'could not update', '_id': reqId })
     })
     
     .delete(function (req, res){
